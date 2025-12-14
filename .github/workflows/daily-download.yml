@@ -1,0 +1,47 @@
+name: Daily eNotifikasi Download (Edge)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # GitHub schedule uses UTC. Malaysia is UTC+8.
+    # 08:00 Malaysia = 00:00 UTC.
+    - cron: "0 0 * * *"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Setup Edge
+        uses: browser-actions/setup-edge@v1
+        with:
+          edge-version: "latest"
+          install-dependencies: true
+
+      - name: Run downloader
+        env:
+          ENOTIF_USERNAME: ${{ secrets.ENOTIF_USERNAME }}
+          ENOTIF_PASSWORD: ${{ secrets.ENOTIF_PASSWORD }}
+          DOWNLOAD_DIR: ${{ github.workspace }}/downloads
+        run: |
+          python automation/enotifikasi_download.py
+
+      - name: Upload downloads
+        uses: actions/upload-artifact@v4
+        with:
+          name: enotifikasi-download
+          path: downloads/
+          if-no-files-found: warn
