@@ -28,8 +28,7 @@ jobs:
       - name: Setup Edge
         uses: browser-actions/setup-edge@v1
         with:
-          edge-version: "latest"
-          install-dependencies: true
+          edge-version: "stable"
 
       - name: Run downloader
         env:
